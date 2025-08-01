@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  password String
+}
+
+model Kelas {
+  id       Int       @id @default(autoincrement())
+  nama     String
+  siswa    Siswa[]
+  jadwal   JadwalAbsensi[]
+}
+
+model Siswa {
+  id         Int       @id @default(autoincrement())
+  nama       String
+  uid_kartu  String    @unique
+  nis        String    @unique
+  kelasId    Int
+  kelas      Kelas     @relation(fields: [kelasId], references: [id])
+  absensi    Absensi[]
+}
+
+model JadwalAbsensi {
+  id          Int       @id @default(autoincrement())
+  kelasId     Int
+  kelas       Kelas     @relation(fields: [kelasId], references: [id])
+  hari        String     // Contoh: "Senin", "Selasa"
+  jam_mulai   String     // Format: "07:00"
+  jam_selesai String     // Format: "07:30"
+}
+
+model Absensi {
+  id        Int       @id @default(autoincrement())
+  siswaId   Int
+  siswa     Siswa     @relation(fields: [siswaId], references: [id])
+  waktu     DateTime  // waktu absen
+  status    String    // "hadir", "terlambat", dll.
+}
+
