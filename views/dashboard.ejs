@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SiRajin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1F2937',
+                        light: '#F3F4F6',
+                        'primary-light': '#EEF2FF',
+                        'secondary-light': '#D1FAE5',
+                        'accent-light': '#FEF3C7',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+            overflow: hidden;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: absolute;
+                z-index: 50;
+                height: 100vh;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+            }
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50">
+    <!-- Overlay Mobile -->
+    <div class="overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar bg-white shadow-md fixed h-full z-50 w-64">
+        <%- include('./components/sidebar') %>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-0 md:ml-64 transition-all duration-300">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between p-4">
+                <div class="flex items-center space-x-4">
+                    <button id="mobileToggle" class="md:hidden text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="text-xl font-bold text-gray-800">Dashboard</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 rounded-full text-gray-500 hover:bg-gray-100 relative">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-danger"></span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="hidden md:inline text-sm font-medium">Admin</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Total Siswa</p>
+                            <h3 class="text-2xl font-bold">1,248</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-primary-light text-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-green-500">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        <span>12% dari bulan lalu</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-secondary">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Hadir Hari Ini</p>
+                            <h3 class="text-2xl font-bold">856</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-secondary-light text-secondary">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-green-500">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        <span>5% dari kemarin</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Terlambat Hari Ini</p>
+                            <h3 class="text-2xl font-bold">42</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-accent-light text-accent">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-red-500">
+                        <i class="fas fa-arrow-down mr-1"></i>
+                        <span>8% dari kemarin</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-danger">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Tidak Hadir</p>
+                            <h3 class="text-2xl font-bold">32</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-red-100 text-danger">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-red-500">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        <span>3% dari kemarin</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Attendance Chart -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">Statistik Kehadiran 7 Hari Terakhir</h2>
+                        <select class="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option>Minggu Ini</option>
+                            <option>Bulan Ini</option>
+                            <option>Tahun Ini</option>
+                        </select>
+                    </div>
+                    <div class="h-64">
+                        <!-- Chart Placeholder -->
+                        <div class="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                            <i class="fas fa-chart-line text-4xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-lg font-semibold mb-4">Aktivitas Terkini</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="p-2 rounded-full bg-primary-light text-primary mr-3">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Andi Pratama melakukan absensi</p>
+                                <p class="text-xs text-gray-500">Kelas 10 IPA 1 - 07:15</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="p-2 rounded-full bg-accent-light text-accent mr-3">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Budi Santoso terlambat</p>
+                                <p class="text-xs text-gray-500">Kelas 11 IPS 2 - 07:45</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="p-2 rounded-full bg-danger-light text-danger mr-3">
+                                <i class="fas fa-user-times"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Citra Dewi tidak hadir</p>
+                                <p class="text-xs text-gray-500">Kelas 12 IPA 3 - 08:00</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="p-2 rounded-full bg-primary-light text-primary mr-3">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Dian Sastro melakukan absensi</p>
+                                <p class="text-xs text-gray-500">Kelas 10 IPS 1 - 07:05</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="p-2 rounded-full bg-primary-light text-primary mr-3">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Eko Prasetyo melakukan absensi</p>
+                                <p class="text-xs text-gray-500">Kelas 12 IPA 1 - 07:10</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Attendance and Classes -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Recent Attendance -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold">Absensi Terbaru</h2>
+                            <a href="#" class="text-sm text-primary hover:underline">Lihat Semua</a>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siswa</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Andi Pratama</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">10 IPA 1</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">07:15</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Hadir</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Budi Santoso</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">11 IPS 2</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">07:45</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Terlambat</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Citra Dewi</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">12 IPA 3</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">-</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Tidak Hadir</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Dian Sastro</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">10 IPS 1</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">07:05</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Hadir</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Eko Prasetyo</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">12 IPA 1</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">07:10</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Hadir</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classes Schedule -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold">Jadwal Absensi Hari Ini</h2>
+                            <a href="#" class="text-sm text-primary hover:underline">Lihat Semua</a>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 border border-gray-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-medium">10 IPA 1</h3>
+                                    <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">Aktif</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-clock mr-2"></i>
+                                    <span>07:00 - 07:30</span>
+                                </div>
+                                <div class="mt-2 flex justify-between text-sm">
+                                    <span>25/30 hadir</span>
+                                    <span class="text-green-600">83%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 83%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 border border-gray-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-medium">11 IPS 2</h3>
+                                    <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">Aktif</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-clock mr-2"></i>
+                                    <span>07:30 - 08:00</span>
+                                </div>
+                                <div class="mt-2 flex justify-between text-sm">
+                                    <span>20/28 hadir</span>
+                                    <span class="text-yellow-600">71%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 71%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 border border-gray-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-medium">12 IPA 3</h3>
+                                    <span class="text-sm bg-gray-100 text-gray-800 px-2 py-1 rounded">Selesai</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-clock mr-2"></i>
+                                    <span>08:00 - 08:30</span>
+                                </div>
+                                <div class="mt-2 flex justify-between text-sm">
+                                    <span>28/32 hadir</span>
+                                    <span class="text-green-600">88%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 88%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle sidebar for desktop (optional)
+        // const desktopToggle = document.getElementById('desktopToggle');
+        // desktopToggle.addEventListener('click', function() {
+        //     sidebar.classList.toggle('collapsed');
+        //     document.querySelector('.main-content').classList.toggle('ml-20');
+        //     document.querySelector('.main-content').classList.toggle('ml-64');
+        // });
+
+        // Simulate loading data
+        document.addEventListener('DOMContentLoaded', function() {
+            // You can add AJAX calls here to load real data
+            console.log('Dashboard loaded');
+        });
+    </script>
+</body>
+</html>
