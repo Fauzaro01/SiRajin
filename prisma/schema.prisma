@@ -50,6 +50,13 @@ model Absensi {
   siswaId   Int
   siswa     Siswa     @relation(fields: [siswaId], references: [id])
   waktu     DateTime  // waktu absen
-  status    String    // "hadir", "terlambat", dll.
+  status    StatusAbsensi    // "hadir", "terlambat", dll.
 }
 
+enum StatusAbsensi {
+  HADIR
+  TERLAMBAT
+  IZIN
+  SAKIT
+  ALFA
+}
