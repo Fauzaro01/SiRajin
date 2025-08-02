@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terjadi Kesalahan - Sistem Absensi RFID Sekolah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        dark: '#1F2937',
+                        light: '#F3F4F6',
+                    },
+                    animation: {
+                        'shake': 'shake 0.82s cubic-bezier(.36,.07,.19,.97) both',
+                    },
+                    keyframes: {
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+            }
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gradient-to-br from-light to-gray-100 min-h-screen flex items-center">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-3xl mx-auto text-center">
+            <div class="flex justify-center mb-8 animate__animated animate__shakeX">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center text-white font-bold text-2xl">500</div>
+            </div>
+            
+            <h1 class="text-5xl md:text-6xl font-bold text-dark mb-6 animate__animated animate__fadeInDown">
+                <span class="text-gradient">Terjadi Kesalahan</span>
+            </h1>
+            
+            <div class="bg-white p-8 rounded-3xl shadow-xl mb-8 animate__animated animate__fadeInUp animate__delay-1s">
+                <img src="https://illustrations.popsy.co/amber/system-error.svg" alt="Error Illustration" class="w-full max-w-md mx-auto mb-6">
+                
+                <p class="text-xl text-gray-600 mb-6">
+                    Maaf, terjadi kesalahan pada server kami. Tim teknis telah diberitahu dan sedang bekerja untuk memperbaiki masalah ini.
+                </p>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded text-left">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <span class="font-medium">Error 500:</span> Internal Server Error. Silakan coba lagi beberapa saat atau hubungi administrator sistem.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded text-left">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <span class="font-medium">Informasi Teknis:</span> Error terjadi pada modul absensi saat memproses data RFID. [Error ID: SERVER-5A2B8C]
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="animate__animated animate__fadeInUp animate__delay-2s">
+                <a href="index.html" class="inline-block bg-gradient-to-r from-primary to-indigo-600 text-white px-8 py-3 rounded-full text-lg font-medium hover:from-primary hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition shadow-lg hover:shadow-xl mr-4">
+                    Kembali ke Beranda
+                </a>
+                <a href="mailto:support@rfidsekolah.com" class="inline-block border-2 border-primary text-primary px-8 py-3 rounded-full text-lg font-medium hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition">
+                    Hubungi Support
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animasi tambahan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.animate__animated');
+            
+            elements.forEach((element, index) => {
+                // Tambahkan delay bertahap untuk animasi
+                element.style.animationDelay = `${index * 0.2}s`;
+            });
+            
+            // Animasi shake untuk ikon error
+            const errorIcon = document.querySelector('.animate__shakeX');
+            setInterval(() => {
+                errorIcon.classList.remove('animate__shakeX');
+                setTimeout(() => {
+                    errorIcon.classList.add('animate__shakeX');
+                }, 50);
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
