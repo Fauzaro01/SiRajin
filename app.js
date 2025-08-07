@@ -6,6 +6,7 @@ const passport = require("passport");
 const path = require("path");
 const prisma = require("./config/database");
 const morgan = require("morgan");
+const errorHandler = require('./middleware/error');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -48,16 +49,7 @@ app.use((req, res, next) => {
   res.status(404).render("notfound");
 });
 
-app.use((err, req, res, next) => {
-  err.status = err.status || 500;
-
-  console.error(err.stack);
-
-  res.status(err.status).render("error", {
-    error: err,
-    message: err.message,
-  });
-});
+app.use(errorHandler);
 
 async function startServer() {
   try {
