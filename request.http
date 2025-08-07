@@ -1,0 +1,29 @@
+GET http://localhost:3000/api/siswa
+Content-Type: application/json
+
+### GET Datatable Siswa
+GET http://localhost:3000/api/siswa/datatable?draw=1&start=0&length=10&search[value]=&search[regex]=false
+Content-Type: application/json
+
+### POST Tambah Siswa
+POST http://localhost:3000/api/siswa
+Content-Type: application/json
+
+{
+  "nis": "123456",
+  "nama": "Budi Santoso",
+  "uid_kartu": "UID123456",
+  "kelasId": 3
+}
+
+### DELETE Siswa (contoh dengan id 1)
+DELETE http://localhost:3000/api/siswa/1
+Content-Type: application/json
+
+###
+POST http://localhost:3000/api/rfid/scan
+Content-Type: application/json
+
+{
+    "rfid_kartu": "ABCDQ"
+}

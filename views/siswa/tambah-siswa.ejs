@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Siswa - SiRajin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1F2937',
+                        light: '#F3F4F6',
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-50">
+    <div class="overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar bg-white shadow-md fixed h-full z-50 w-64">
+        <%- include('../components/sidebar') %>
+    </div>
+
+    <div class="ml-0 md:ml-64 transition-all duration-300">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between p-4">
+                <div class="flex items-center space-x-4">
+                    <button id="mobileToggle" class="md:hidden text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="text-xl font-bold text-gray-800">Tambah Siswa Baru</h1>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden p-6">
+                <form id="studentForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Kolom Kiri -->
+                        <div class="space-y-4">
+                            <div>
+                                <label for="nis" class="block text-sm font-medium text-gray-700 mb-1">NIS</label>
+                                <input type="text" id="nis" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                            </div>
+                            
+                            <div>
+                                <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                <input type="text" id="nama" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                            </div>
+                            
+                            <div>
+                                <label for="kelas" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="kelas" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                                    <option value="">Pilih Kelas</option>
+                                    <!-- Options akan diisi oleh JavaScript -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Kolom Kanan -->
+                        <div class="space-y-4">
+                            <div>
+                                <label for="uid_kartu" class="block text-sm font-medium text-gray-700 mb-1">UID Kartu RFID</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="text" id="uid_kartu" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" readonly required>
+                                    <button type="button" id="scanBtn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 flex items-center">
+                                        <i class="fas fa-rss mr-2"></i> Scan
+                                    </button>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Tekan tombol Scan dan tempelkan kartu RFID ke reader</p>
+                            </div>
+                            
+                            <div id="scanStatus" class="hidden p-3 rounded-lg bg-blue-50 text-blue-800 flex items-start">
+                                <i class="fas fa-info-circle mt-1 mr-2"></i>
+                                <div>
+                                    <p class="font-medium">Sedang menunggu scan RFID...</p>
+                                    <p class="text-sm">Tempelkan kartu RFID ke reader</p>
+                                </div>
+                            </div>
+                            
+                            <div id="scanSuccess" class="hidden p-3 rounded-lg bg-green-50 text-green-800 flex items-start">
+                                <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                <div>
+                                    <p class="font-medium">Kartu berhasil discan!</p>
+                                    <p class="text-sm" id="uidDisplay"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 flex justify-end space-x-3">
+                        <a href="/siswa" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Batal</a>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 flex items-center">
+                            <i class="fas fa-save mr-2"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Variabel untuk kontrol scan
+        let scanInterval;
+        let isScanning = false;
+        
+        // Fungsi untuk memuat data kelas
+        function loadClasses() {
+            $.ajax({
+                url: '/api/kelas',
+                type: 'GET',
+                success: function(response) {
+                    const select = $('#kelas');
+                    select.empty();
+                    select.append('<option value="">Pilih Kelas</option>');
+                    
+                    response.data.forEach(kelas => {
+                        select.append(`<option value="${kelas.id}">${kelas.nama}</option>`);
+                    });
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Gagal memuat data kelas',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+        
+        // Fungsi untuk memulai proses scan
+        function startScanning() {
+            if (isScanning) return;
+            
+            isScanning = true;
+            $('#scanBtn').prop('disabled', true);
+            $('#scanBtn').html('<i class="fas fa-spinner fa-spin mr-2"></i> Scanning...');
+            $('#scanStatus').removeClass('hidden');
+            $('#scanSuccess').addClass('hidden');
+            
+            // Kosongkan UID sebelumnya
+            $('#uid_kartu').val('');
+            
+            // Mulai polling ke endpoint getscan
+            scanInterval = setInterval(() => {
+                $.ajax({
+                    url: '/api/rfid/getscan',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.rfid) {
+                            // RFID ditemukan
+                            clearInterval(scanInterval);
+                            $('#uid_kartu').val(response.rfid);
+                            $('#uidDisplay').text('UID: ' + response.rfid);
+                            $('#scanStatus').addClass('hidden');
+                            $('#scanSuccess').removeClass('hidden');
+                            $('#scanBtn').html('<i class="fas fa-rss mr-2"></i> Scan Ulang');
+                            $('#scanBtn').prop('disabled', false);
+                            isScanning = false;
+                            
+                            // Tampilkan notifikasi sukses
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: 'Kartu RFID berhasil dibaca',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error scanning RFID:', xhr);
+                    }
+                });
+            }, 1000); // Polling setiap 1 detik
+            
+            // Set timeout jika tidak ada respon setelah 30 detik
+            setTimeout(() => {
+                if (isScanning) {
+                    stopScanning();
+                    Swal.fire({
+                        title: 'Timeout!',
+                        text: 'Tidak ada kartu yang terdeteksi',
+                        icon: 'error'
+                    });
+                }
+            }, 30000);
+        }
+        
+        // Fungsi untuk menghentikan proses scan
+        function stopScanning() {
+            clearInterval(scanInterval);
+            isScanning = false;
+            $('#scanBtn').html('<i class="fas fa-rss mr-2"></i> Scan');
+            $('#scanBtn').prop('disabled', false);
+            $('#scanStatus').addClass('hidden');
+        }
+        
+        // Event listener untuk tombol scan
+        $('#scanBtn').click(function() {
+            if (isScanning) {
+                stopScanning();
+            } else {
+                startScanning();
+            }
+        });
+        
+        // Form submission
+        $('#studentForm').submit(function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                nis: $('#nis').val(),
+                nama: $('#nama').val(),
+                uid_kartu: $('#uid_kartu').val(),
+                kelasId: $('#kelas').val()
+            };
+            
+            // Validasi form
+            if (!formData.uid_kartu) {
+                Swal.fire({
+                    title: 'Peringatan!',
+                    text: 'Silakan scan kartu RFID terlebih dahulu',
+                    icon: 'warning'
+                });
+                return;
+            }
+            
+            // Kirim data ke server
+            $.ajax({
+                url: '/api/siswa',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    Swal.fire({
+                        title: 'Sukses!',
+                        text: 'Data siswa berhasil ditambahkan',
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.href = '/siswa';
+                    });
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: xhr.responseJSON?.message || 'Gagal menambahkan siswa',
+                        icon: 'error'
+                    });
+                }
+            });
+        });
+        
+        // Load data kelas saat halaman dimuat
+        $(document).ready(function() {
+            loadClasses();
+        });
+    </script>
+</body>
+</html>
