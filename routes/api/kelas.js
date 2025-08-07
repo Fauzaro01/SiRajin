@@ -4,9 +4,9 @@ const prisma = require('../../config/database');
 
 router.get('/', async (req, res) => {
     try {
-        const dataKelas = prisma.kelas.findMany();
+        const dataKelas = await prisma.kelas.findMany();
         res.json({
-            kelas: dataKelas
+            data: dataKelas
         }).status(200);
     } catch (error) {
         res.json({
