@@ -15,14 +15,15 @@ router.get('/', async (req, res) => {
     }
 });
 
+
 // Contoh endpoint (Node.js Express)
 router.get('/datatable', async (req, res) => {
     try {
         const { draw, start, length, search } = req.query;
-
+        
         // Pastikan search memiliki nilai default jika undefined
         const searchValue = search?.value || '';
-
+        
         // Query ke database dengan pagination dan search
         const classes = await prisma.kelas.findMany({
             skip: parseInt(start) || 0,
@@ -46,14 +47,14 @@ router.get('/datatable', async (req, res) => {
                 ]
             }
         });
-
+        
         // Format data untuk DataTables
         const formattedData = classes.map(kelas => ({
             id: kelas.id,
             nama: kelas.nama,
             siswa_count: kelas.siswa.length // Hitung jumlah siswa
         }));
-
+        
         res.json({
             draw: parseInt(draw) || 0,
             recordsTotal: totalRecords,
@@ -76,13 +77,69 @@ router.post('/', async (req, res) => {
         const newClass = await prisma.kelas.create({
             data: { nama }
         });
-
+        
         res.status(201).json({ 
             message: 'Class created successfully',
             data: newClass
         });
     } catch (error) {
         console.error('Error creating class:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+})
+
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const kelas = await prisma.kelas.findUnique({
+            where: { id: parseInt(id) },
+            include: {
+                _count: {
+                    select: { siswa: true }
+                }
+            }
+        });
+
+        if (!kelas) {
+            return res.status(404).json({ message: 'Class not found' });
+        }
+
+        res.json({
+            data: {
+                id: kelas.id,
+                nama: kelas.nama,
+                siswa_count: kelas._count.siswa
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching class:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+})
+
+router.put('/:id', async (req, res) => {
+     try {
+        const { id } = req.params;
+        const { nama } = req.body;
+
+        if (!nama) {
+            return res.status(400).json({ message: 'Class name is required' });
+        }
+
+        const updatedClass = await prisma.kelas.update({
+            where: { id: parseInt(id) },
+            data: { nama }
+        });
+
+        res.json({ 
+            message: 'Class updated successfully',
+            data: updatedClass
+        });
+    } catch (error) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({ message: 'Class not found' });
+        }
+        console.error('Error updating class:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 })
