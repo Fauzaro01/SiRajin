@@ -65,5 +65,62 @@ router.get('/datatable', async (req, res) => {
     }
 });
 
+router.post('/', async (req, res) => {
+    try {
+        const { nama } = req.body;
+
+        if (!nama) {
+            return res.status(400).json({ message: 'Class name is required' });
+        }
+
+        const newClass = await prisma.kelas.create({
+            data: { nama }
+        });
+
+        res.status(201).json({ 
+            message: 'Class created successfully',
+            data: newClass
+        });
+    } catch (error) {
+        console.error('Error creating class:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+})
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if class has students
+        const studentsCount = await prisma.siswa.count({
+            where: { kelasId: parseInt(id) }
+        });
+
+        if (studentsCount > 0) {
+            return res.status(400).json({ 
+                message: 'Cannot delete class with students. Please remove students first.' 
+            });
+        }
+
+        // Delete related schedules first
+        await prisma.jadwalAbsensi.deleteMany({
+            where: { kelasId: parseInt(id) }
+        });
+
+        // Then delete the class
+        await prisma.kelas.delete({
+            where: { id: parseInt(id) }
+        });
+
+        res.json({ message: 'Class deleted successfully' });
+    } catch (error) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({ message: 'Class not found' });
+        }
+        console.error('Error deleting class:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+})
+
 
 module.exports = router;
