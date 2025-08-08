@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Jadwal - SiRajin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1F2937',
+                        light: '#F3F4F6',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: absolute;
+                z-index: 50;
+                height: 100vh;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+            }
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50">
+    <!-- Overlay Mobile -->
+    <div class="overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar bg-white shadow-md fixed h-full z-50 w-64">
+        <%- include('./components/sidebar') %>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-0 md:ml-64 transition-all duration-300">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between p-4">
+                <div class="flex items-center space-x-4">
+                    <button id="mobileToggle" class="md:hidden text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="text-xl font-bold text-gray-800">Management Jadwal Absensi</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- User profile -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4">
+            <!-- Header and Add Button -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Daftar Jadwal</h2>
+                    <p class="text-gray-600">Kelola jadwal absensi untuk setiap kelas</p>
+                </div>
+                <button id="addScheduleBtn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Tambah Jadwal
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4">
+                    <table id="schedulesTable" class="w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left py-3 px-4">No</th>
+                                <th class="text-left py-3 px-4">Kelas</th>
+                                <th class="text-left py-3 px-4">Hari</th>
+                                <th class="text-left py-3 px-4">Jam Mulai</th>
+                                <th class="text-left py-3 px-4">Jam Selesai</th>
+                                <th class="text-left py-3 px-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data akan diisi oleh DataTables -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold" id="modalTitle">Tambah Jadwal Baru</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="scheduleForm" class="p-4">
+                <input type="hidden" id="scheduleId">
+                <div class="space-y-4">
+                    <div>
+                        <label for="kelasSelect" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                        <select id="kelasSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                            <option value="">Pilih Kelas</option>
+                            <!-- Options akan diisi oleh JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="hariSelect" class="block text-sm font-medium text-gray-700 mb-1">Hari</label>
+                        <select id="hariSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                            <option value="">Pilih Hari</option>
+                            <option value="SENIN">Senin</option>
+                            <option value="SELASA">Selasa</option>
+                            <option value="RABU">Rabu</option>
+                            <option value="KAMIS">Kamis</option>
+                            <option value="JUMAT">Jumat</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="jamMulai" class="block text-sm font-medium text-gray-700 mb-1">Jam Mulai</label>
+                            <input type="time" id="jamMulai" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                        </div>
+                        <div>
+                            <label for="jamSelesai" class="block text-sm font-medium text-gray-700 mb-1">Jam Selesai</label>
+                            <input type="time" id="jamSelesai" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancelBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Toggle sidebar for mobile
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.overlay');
+        const toggleSidebar = document.getElementById('toggleSidebar');
+
+        mobileToggle.addEventListener('click', function() {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+        });
+
+        toggleSidebar.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+
+        // Initialize DataTable
+        let dataTable = $('#schedulesTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '/api/jadwal/datatable', // Ganti dengan endpoint API Anda
+                type: 'GET'
+            },
+            columns: [
+                { 
+                    data: null,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    },
+                    className: 'px-4 py-3'
+                },
+                { 
+                    data: 'kelas.nama',
+                    className: 'px-4 py-3 font-medium'
+                },
+                { 
+                    data: 'hari',
+                    className: 'px-4 py-3',
+                    render: function(data, type, row) {
+                        const hariMap = {
+                            'SENIN': 'Senin',
+                            'SELASA': 'Selasa',
+                            'RABU': 'Rabu',
+                            'KAMIS': 'Kamis',
+                            'JUMAT': 'Jumat'
+                        };
+                        return hariMap[data] || data;
+                    }
+                },
+                { 
+                    data: 'jam_mulai',
+                    className: 'px-4 py-3'
+                },
+                { 
+                    data: 'jam_selesai',
+                    className: 'px-4 py-3'
+                },
+                {
+                    data: 'id',
+                    className: 'px-4 py-3',
+                    render: function(data, type, row) {
+                        return `
+                            <div class="flex space-x-2">
+                                <button class="edit-btn px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200" data-id="${data}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="delete-btn px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" data-id="${data}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            ],
+            responsive: true,
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json' // Bahasa Indonesia
+            }
+        });
+
+        // Modal Elements
+        const modal = document.getElementById('scheduleModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const scheduleForm = document.getElementById('scheduleForm');
+        const scheduleIdInput = document.getElementById('scheduleId');
+        const kelasSelect = document.getElementById('kelasSelect');
+        const hariSelect = document.getElementById('hariSelect');
+        const jamMulaiInput = document.getElementById('jamMulai');
+        const jamSelesaiInput = document.getElementById('jamSelesai');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const addScheduleBtn = document.getElementById('addScheduleBtn');
+
+        // Load classes for select dropdown
+        function loadClasses() {
+            $.ajax({
+                url: '/api/kelas',
+                type: 'GET',
+                success: function(response) {
+                    kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
+                    response.data.forEach(kelas => {
+                        const option = document.createElement('option');
+                        option.value = kelas.id;
+                        option.textContent = kelas.nama;
+                        kelasSelect.appendChild(option);
+                    });
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Gagal memuat data kelas',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+
+        // Open Modal for Add
+        addScheduleBtn.addEventListener('click', function() {
+            modalTitle.textContent = 'Tambah Jadwal Baru';
+            scheduleForm.reset();
+            scheduleIdInput.value = '';
+            loadClasses();
+            modal.classList.remove('hidden');
+        });
+
+        // Open Modal for Edit
+        $(document).on('click', '.edit-btn', function() {
+            const id = $(this).data('id');
+            
+            // Contoh AJAX untuk mendapatkan data jadwal
+            $.ajax({
+                url: `/api/jadwal/${id}`,
+                type: 'GET',
+                success: function(response) {
+                    modalTitle.textContent = 'Edit Jadwal';
+                    scheduleIdInput.value = response.data.id;
+                    
+                    // Load classes and set selected value
+                    loadClasses();
+                    
+                    // Set other values after a small delay to ensure classes are loaded
+                    setTimeout(() => {
+                        kelasSelect.value = response.data.kelasId;
+                        hariSelect.value = response.data.hari;
+                        jamMulaiInput.value = response.data.jam_mulai;
+                        jamSelesaiInput.value = response.data.jam_selesai;
+                        modal.classList.remove('hidden');
+                    }, 100);
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Gagal mengambil data jadwal',
+                        icon: 'error'
+                    });
+                }
+            });
+        });
+
+        // Close Modal
+        function closeModalFunc() {
+            modal.classList.add('hidden');
+        }
+
+        closeModal.addEventListener('click', closeModalFunc);
+        cancelBtn.addEventListener('click', closeModalFunc);
+
+        // Form Submit
+        scheduleForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                kelasId: kelasSelect.value,
+                hari: hariSelect.value,
+                jam_mulai: jamMulaiInput.value,
+                jam_selesai: jamSelesaiInput.value
+            };
+            
+            const id = scheduleIdInput.value;
+            const url = id ? `/api/jadwal/${id}` : '/api/jadwal';
+            const method = id ? 'PUT' : 'POST';
+            
+            // Validasi jam
+            if (formData.jam_mulai >= formData.jam_selesai) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Jam selesai harus setelah jam mulai',
+                    icon: 'error'
+                });
+                return;
+            }
+            
+            $.ajax({
+                url: url,
+                type: method,
+                data: formData,
+                success: function(response) {
+                    closeModalFunc();
+                    dataTable.ajax.reload();
+                    
+                    Swal.fire({
+                        title: 'Sukses!',
+                        text: id ? 'Jadwal berhasil diperbarui' : 'Jadwal berhasil ditambahkan',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: xhr.responseJSON?.message || 'Terjadi kesalahan',
+                        icon: 'error'
+                    });
+                }
+            });
+        });
+
+        // Delete Schedule
+        $(document).on('click', '.delete-btn', function() {
+            const id = $(this).data('id');
+            
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Jadwal ini akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/jadwal/${id}`,
+                        type: 'DELETE',
+                        success: function(response) {
+                            dataTable.ajax.reload();
+                            
+                            Swal.fire({
+                                title: 'Terhapus!',
+                                text: 'Jadwal berhasil dihapus',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: xhr.responseJSON?.message || 'Gagal menghapus jadwal',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

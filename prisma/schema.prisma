@@ -40,9 +40,17 @@ model JadwalAbsensi {
   id          Int       @id @default(autoincrement())
   kelasId     Int
   kelas       Kelas     @relation(fields: [kelasId], references: [id])
-  hari        String     // Contoh: "Senin", "Selasa"
+  hari        Hari     // Contoh: "Senin", "Selasa"
   jam_mulai   String     // Format: "07:00"
   jam_selesai String     // Format: "07:30"
+}
+
+enum Hari {
+  SENIN
+  SELASA
+  RABU
+  KAMIS 
+  JUMAT
 }
 
 model Absensi {

@@ -22,5 +22,14 @@ router.get('/siswa/tambah', (req, res) => {
     res.render('siswa/tambah-siswa');
 })
 
+router.get('/siswa/edit', (req, res) => {
+    res.render('siswa/edit-siswa');
+})
+
+router.get('/jadwal', ensureAuthenticated, (req, res) => {
+    res.render('jadwal');
+})
+
+// router.get('/jadwal')
 
 module.exports = router;
