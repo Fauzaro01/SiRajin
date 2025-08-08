@@ -153,6 +153,125 @@ router.delete('/:id', async (req, res) => {
     }
 })
 
+router.get('/:id', async (req, res) => {
+    try {
+    const { id } = req.params;
+    
+    const siswa = await prisma.siswa.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        kelas: true
+      }
+    });
 
+    if (!siswa) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Siswa tidak ditemukan' 
+      });
+    }
+
+    res.json({
+      success: true,
+      data: siswa
+    });
+  } catch (error) {
+    console.error('Error fetching siswa:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Gagal mengambil data siswa',
+      error: error.message 
+    });
+  }
+})
+
+router.put('/:id', async(req, res) => {
+     try {
+       const { id } = req.params;
+       const { nis, nama, uid_kartu, kelasId } = req.body;
+
+       // Validasi input
+       if (!nis || !nama || !uid_kartu || !kelasId) {
+         return res.status(400).json({
+           success: false,
+           message: "Semua field harus diisi",
+         });
+       }
+
+       // Cek apakah kelas ada
+       const kelasExists = await prisma.kelas.findUnique({
+         where: { id: parseInt(kelasId) },
+       });
+
+       if (!kelasExists) {
+         return res.status(400).json({
+           success: false,
+           message: "Kelas tidak valid",
+         });
+       }
+
+       // Cek apakah NIS sudah digunakan oleh siswa lain
+       const nisExists = await prisma.siswa.findFirst({
+         where: {
+           nis,
+           NOT: {
+             id: parseInt(id),
+           },
+         },
+       });
+
+       if (nisExists) {
+         return res.status(400).json({
+           success: false,
+           message: "NIS sudah digunakan oleh siswa lain",
+         });
+       }
+
+       // Cek apakah UID kartu sudah digunakan oleh siswa lain
+       const uidExists = await prisma.siswa.findFirst({
+         where: {
+           uid_kartu,
+           NOT: {
+             id: parseInt(id),
+           },
+         },
+       });
+
+       if (uidExists) {
+         return res.status(400).json({
+           success: false,
+           message: "UID kartu sudah digunakan oleh siswa lain",
+         });
+       }
+
+       // Update data siswa
+       const updatedSiswa = await prisma.siswa.update({
+         where: { id: parseInt(id) },
+         data: {
+           nis,
+           nama,
+           uid_kartu,
+           kelasId: parseInt(kelasId),
+         },
+         include: {
+           kelas: true,
+         },
+       });
+
+       res.json({
+         success: true,
+         message: "Data siswa berhasil diperbarui",
+         data: updatedSiswa,
+       });
+     } catch (error) {
+       console.error("Error updating siswa:", error);
+       res.status(500).json({
+         success: false,
+         message: "Gagal memperbarui data siswa",
+         error: error.message,
+       });
+     }
+
+})
 
 module.exports = router;

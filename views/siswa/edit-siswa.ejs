@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Siswa - SiRajin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1F2937',
+                        light: '#F3F4F6',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: absolute;
+                z-index: 50;
+                height: 100vh;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+            }
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50">
+    <!-- Overlay Mobile -->
+    <div class="overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar bg-white shadow-md fixed h-full z-50 w-64">
+        <%- include('../components/sidebar') %>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-0 md:ml-64 transition-all duration-300">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between p-4">
+                <div class="flex items-center space-x-4">
+                    <button id="mobileToggle" class="md:hidden text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="text-xl font-bold text-gray-800">Edit Data Siswa</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- User profile -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden p-6">
+                <!-- Breadcrumb -->
+                <nav class="flex mb-6" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-2">
+                        <li class="inline-flex items-center">
+                            <a href="/siswa" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-primary">
+                                <i class="fas fa-home mr-2"></i>
+                                Siswa
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                                <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Edit Siswa</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <!-- Form Edit Siswa -->
+                <form id="editSiswaForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- NIS -->
+                        <div>
+                            <label for="nis" class="block text-sm font-medium text-gray-700 mb-1">NIS</label>
+                            <input type="text" id="nis" name="nis" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                        </div>
+
+                        <!-- Nama Siswa -->
+                        <div>
+                            <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Siswa</label>
+                            <input type="text" id="nama" name="nama" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                        </div>
+
+                        <!-- UID Kartu RFID -->
+                        <div>
+                            <label for="uid_kartu" class="block text-sm font-medium text-gray-700 mb-1">UID Kartu RFID</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="uid_kartu" name="uid_kartu" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                                <button type="button" id="scanRfidBtn" class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-opacity-90 transition flex items-center">
+                                    <i class="fas fa-rss mr-2"></i> Scan RFID
+                                </button>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Tempelkan kartu RFID ke reader untuk mendapatkan UID</p>
+                        </div>
+
+                        <!-- Kelas -->
+                        <div>
+                            <label for="kelasId" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                            <select id="kelasId" name="kelasId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                                <option value="">Pilih Kelas</option>
+                                <!-- Options akan diisi oleh JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                        <a href="/siswa" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                            Batal
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition flex items-center">
+                            <i class="fas fa-save mr-2"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Ambil ID siswa dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const siswaId = urlParams.get('id');
+
+        // Fungsi untuk memuat data siswa
+        async function loadSiswaData() {
+            if (!siswaId) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'ID siswa tidak valid',
+                    icon: 'error',
+                    willClose: () => {
+                        window.location.href = '/siswa';
+                    }
+                });
+                return;
+            }
+
+            try {
+                // Tampilkan loading
+                Swal.fire({
+                    title: 'Memuat Data Siswa',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Ambil data siswa
+                const siswaResponse = await fetch(`/api/siswa/${siswaId}`);
+                if (!siswaResponse.ok) {
+                    throw new Error('Gagal memuat data siswa');
+                }
+                const siswaData = await siswaResponse.json();
+
+                // Ambil data kelas untuk dropdown
+                const kelasResponse = await fetch('/api/kelas');
+                if (!kelasResponse.ok) {
+                    throw new Error('Gagal memuat data kelas');
+                }
+                const kelasData = await kelasResponse.json();
+
+                // Isi form dengan data siswa
+                document.getElementById('nis').value = siswaData.nis || '';
+                document.getElementById('nama').value = siswaData.nama || '';
+                document.getElementById('uid_kartu').value = siswaData.uid_kartu || '';
+
+                // Isi dropdown kelas
+                const kelasSelect = document.getElementById('kelasId');
+                kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
+                kelasData.data.forEach(kelas => {
+                    const option = document.createElement('option');
+                    option.value = kelas.id;
+                    option.textContent = kelas.nama;
+                    option.selected = kelas.id === siswaData.kelasId;
+                    kelasSelect.appendChild(option);
+                });
+
+                // Tutup loading
+                Swal.close();
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message,
+                    icon: 'error',
+                    willClose: () => {
+                        window.location.href = '/siswa';
+                    }
+                });
+            }
+        }
+
+        // Fungsi untuk scan RFID
+        async function scanRFID() {
+            try {
+                const scanBtn = document.getElementById('scanRfidBtn');
+                scanBtn.disabled = true;
+                scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Scanning...';
+
+                Swal.fire({
+                    title: 'Menunggu Kartu RFID',
+                    text: 'Tempelkan kartu RFID ke reader',
+                    icon: 'info',
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+
+                // Panggil endpoint scan RFID
+                const response = await fetch('/api/rfid/getscan', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok || response.json().uid_kartu == null) {
+                    throw new Error('Gagal membaca kartu RFID');
+                }
+
+                const data = await response.json();
+                document.getElementById('uid_kartu').value = data.uid || '';
+
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: `Kartu RFID terdeteksi: ${data.uid}`,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message,
+                    icon: 'error'
+                });
+            } finally {
+                const scanBtn = document.getElementById('scanRfidBtn');
+                scanBtn.disabled = false;
+                scanBtn.innerHTML = '<i class="fas fa-rss mr-2"></i> Scan RFID';
+            }
+        }
+
+        // Fungsi untuk submit form
+        async function submitForm(event) {
+            event.preventDefault();
+
+            const formData = {
+                nis: document.getElementById('nis').value,
+                nama: document.getElementById('nama').value,
+                uid_kartu: document.getElementById('uid_kartu').value,
+                kelasId: parseInt(document.getElementById('kelasId').value)
+            };
+
+            try {
+                // Tampilkan loading
+                Swal.fire({
+                    title: 'Menyimpan Perubahan',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Kirim data ke API
+                const response = await fetch(`/api/siswa/${siswaId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Gagal menyimpan perubahan');
+                }
+
+                // Tampilkan pesan sukses
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Data siswa berhasil diperbarui',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    willClose: () => {
+                        window.location.href = '/siswa';
+                    }
+                });
+
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message,
+                    icon: 'error'
+                });
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSiswaData();
+            
+            document.getElementById('scanRfidBtn').addEventListener('click', scanRFID);
+            document.getElementById('editSiswaForm').addEventListener('submit', submitForm);
+            
+            // Mobile sidebar toggle
+            document.getElementById('mobileToggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('open');
+                document.querySelector('.overlay').classList.toggle('active');
+            });
+            
+            // Close sidebar when clicking overlay
+            document.querySelector('.overlay').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.remove('open');
+                document.querySelector('.overlay').classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
